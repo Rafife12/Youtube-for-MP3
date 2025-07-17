@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube para MP3 | Conversor Online</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: red;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .converter-box {
+            background: rgba(255, 255, 255, 0.95);
+            background: linear-gradient(to bottom right, rgba(255,255,255,0.98) 0%, rgba(240,240,240,0.96) 100%);
+            backdrop-filter: blur(8px);
+            border-radius: 24px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .converter-box {
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        .converter-box:hover {
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            transform: translateY(-5px);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+            background-size: 220% auto;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background-position: right center;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.3);
+            transition: all 0.2s ease-out;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #8a2be2;
+            width: 50px;
+            height: 50px;
+            animation: spin 0.8s linear infinite;
+            position: relative;
+            margin: 0 auto;
+        }
+        
+        .loading-spinner::after {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: -6px;
+            right: -6px;
+            bottom: -6px;
+            border-radius: 50%;
+            border: 6px solid transparent;
+            border-top-color: rgba(255, 255, 255, 0.8);
+            animation: spin 1.5s cubic-bezier(0.65, 0.05, 0.36, 1) infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .result-item {
+            transition: all 0.3s ease;
+        }
+        
+        .result-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .converter-box {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto max-w-4xl">
+        <div class="converter-box p-8 my-10 transform hover:scale-[1.01] transition-transform duration-300">
+            <div class="text-center mb-10">
+                <h1 class="text-4xl font-bold mb-2 text-gray-800">
+                    <span class="text-black">
+                        YouTube para MP3
+                    </span>
+                </h1>
+                <p class="text-gray-800">Converta vídeos do YouTube para arquivos de áudio MP3 de alta qualidade</p>
+            </div>
+            
+            <div class="flex flex-col space-y-4">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        id="youtubeUrl" 
+                        placeholder="Cole o link do vídeo do YouTube aqui..." 
+                        class="w-full p-4 pr-12 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    >
+                    <button class="absolute right-2 top-2 p-2 text-gray-500 hover:text-gray-700" onclick="clearInput()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="quality" class="block text-sm font-medium text-gray-700 mb-2">Qualidade do áudio:</label>
+                        <select id="quality" class="w-full p-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                            <option value="highest">Melhor qualidade (320kbps)</option>
+                            <option value="medium" selected>Qualidade média (192kbps)</option>
+                            <option value="low">Qualidade baixa (128kbps)</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="format" class="block text-sm font-medium text-gray-700 mb-2">Formato:</label>
+                        <select id="format" class="w-full p-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                            <option value="MP3" selected>MP3</option>
+                            <option value="WAV">WAV</option>
+                            <option value="AAC">AAC</option>
+                            <option value="OGG">OGG</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button 
+                    id="convertBtn" 
+                    onclick="convertToMp3()"
+                    class="btn-primary px-6 py-3 rounded-lg font-semibold text-lg mt-4 flex items-center justify-center"
+                >
+                    <i class="fas fa-music mr-2"></i>
+                    Converter para MP3
+                </button>
+                
+                <div id="loading" class="hidden flex-col items-center justify-center py-10">
+                    <div class="loading-spinner mb-4"></div>
+                    <p class="text-gray-600">Convertendo vídeo, por favor aguarde...</p>
+                </div>
+                
+                <div id="result" class="hidden mt-6">
+                    <div class="result-item bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 shadow-lg border border-gray-100">
+                        <div class="flex flex-col md:flex-row items-center">
+                            <div class="w-24 h-24 bg-gray-200 rounded-lg overflow-hidden mb-4 md:mb-0 md:mr-6">
+                                <img id="thumbnail" src="" alt="Capa do vídeo do YouTube" class="w-full h-full object-cover" src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/95adaa23-a10c-4e2d-bd90-208481af4ff3.png">
+                            </div>
+                            
+                            <div class="flex-1">
+                                <h3 id="videoTitle" class="font-bold text-xl text-black mb-2">Título do Vídeo</h3>
+                                <p id="videoDuration" class="text-gray-800 mb-4">Duração: 3:45</p>
+                                
+                                <div class="flex flex-wrap gap-2">
+                                    <button onclick="downloadAudio()" class="btn-primary px-6 py-2 rounded-lg font-medium flex items-center hover:shadow-lg transition-all">
+                                        <i class="fas fa-download mr-2"></i>
+                                        Baixar MP3
+                                    </button>
+                                    
+                                    <button onclick="copyLink()" class="bg-gray-200 hover:bg-gray-300 px-6 py-2 rounded-lg font-medium flex items-center">
+                                        <i class="fas fa-copy mr-2"></i>
+                                        Copiar Link
+                                    </button>
+                                    <button onclick="downloadZip()" class="bg-green-200 hover:bg-green-300 px-6 py-2 rounded-lg font-medium flex items-center">
+                                        <i class="fas fa-file-archive mr-2"></i>
+                                        Baixar ZIP
+                                    </button>
+                                    <button onclick="downloadAll()" class="bg-purple-200 hover:bg-purple-300 px-6 py-2 rounded-lg font-medium flex items-center">
+                                        <i class="fas fa-download mr-2"></i>
+                                        Baixar Tudo
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 bg-white rounded-xl p-6 shadow-md">
+                        <h3 class="font-bold text-lg text-black mb-4">Como usar:</h3>
+                        <ol class="list-decimal list-inside space-y-2">
+                            <li>Cole o link do YouTube no campo acima</li>
+                            <li>Selecione a qualidade e formato desejados</li>
+                            <li>Clique em "Converter para MP3"</li>
+                            <li>Após a conversão, clique em "Baixar MP3"</li>
+                        </ol>
+                        
+                        <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                            <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                Aviso Legal
+                            </h4>
+                            <p class="text-blue-700 text-sm">
+                                Este serviço é apenas para uso pessoal. Certifique-se de ter os direitos necessários para converter e baixar o conteúdo. Não nos responsabilizamos pelo uso indevido desta ferramenta.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentDownloadUrl = '';
+
+        function clearInput() {
+            document.getElementById('youtubeUrl').value = '';
+        }
+        
+        async function convertToMp3() {
+            const youtubeUrl = document.getElementById('youtubeUrl').value.trim();
+            const quality = document.getElementById('quality').value;
+            const format = document.getElementById('format').value;
+
+            if (!youtubeUrl) {
+                showErrorToast('Por favor, insira um link válido do YouTube');
+                return;
+            }
+
+            if (!youtubeUrl.includes('youtube.com') && !youtubeUrl.includes('youtu.be')) {
+                Toastify({
+                    text: "Por favor insira um link válido do YouTube (ex: https://youtube.com/watch?v=VIDEO_ID)",
+                    duration: 4000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)"
+                }).showToast();
+                return;
+            }
+
+            document.getElementById('convertBtn').classList.add('hidden');
+            document.getElementById('loading').classList.remove('hidden');
+
+            let progress = 0;
+            const progressBar = () =>
+                new Promise(resolve => {
+                    const interval = setInterval(() => {
+                        progress += 10;
+                        document.querySelector('.loading-spinner').style.borderTopColor =
+                            `hsl(${progress * 3.6}, 100%, 50%)`;
+
+                        if (progress >= 100) {
+                            clearInterval(interval);
+                            resolve();
+                        }
+                    }, 300);
+                });
+
+            await progressBar();
+
+            const videoId = extractVideoId(youtubeUrl);
+            if (!videoId) {
+                console.error("ID do vídeo não encontrado");
+                document.getElementById('loading').classList.add('hidden');
+                Toastify({
+                    text: "Não foi possível extrair o ID do vídeo",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)"
+                }).showToast();
+                return;
+            }
+
+            let videoTitle = "Música do YouTube";
+
+            try {
+                const response = await fetch(`https://noembed.com/embed?url=https://youtu.be/${videoId}`);
+                if (!response.ok) throw new Error('API response not OK');
+
+                const data = await response.json();
+                if (data && data.title) {
+                    videoTitle = data.title;
+                } else {
+                    console.warn("Título não encontrado na resposta da API");
+                }
+            } catch (error) {
+                console.error("Erro ao buscar título do YouTube:", error);
+                if (youtubeUrl.includes('v=')) {
+                    videoTitle = youtubeUrl.split('v=')[1].split('&')[0] + ' - YouTube';
+                }
+            }
+
+            const videoData = {
+                title: videoTitle,
+                duration: "3:45",
+                thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
+                downloadUrl: `https://ytconvertapi.net/download?id=${videoId}&q=${quality}&f=${format.toLowerCase()}`
+            };
+            currentDownloadUrl = videoData.downloadUrl;
+
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('videoTitle').textContent = videoData.title;
+            document.getElementById('videoDuration').textContent = `Duração: ${videoData.duration}`;
+            document.getElementById('thumbnail').src = videoData.thumbnail;
+            document.getElementById('result').classList.remove('hidden');
+        }
+        
+        function extractVideoId(url) {
+            const regExp = /(?:youtube\.com.*(?:\?|&)v=|youtu\.be\/)([^&#\n]+)/;
+            const match = url.match(regExp);
+            return match ? match[1] : null;
+        }
+
+        function downloadAudio() {
+            if (!currentDownloadUrl) {
+                Toastify({
+                    text: "Nenhum arquivo disponível para download",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "linear-gradient(to right, #ff416c, #ff4b2b)"
+                }).showToast();
+                return;
+            }
+            
+            const link = document.createElement('a');
+            link.href = currentDownloadUrl;
+            link.download = document.getElementById('videoTitle').textContent + '.mp3';
+            
+            Toastify({
+                text: "Download iniciado!",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)"
+            }).showToast();
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        function downloadZip() {
+            if (!currentDownloadUrl) {
+                alert('Nenhum arquivo disponível para download');
+                return;
+            }
+            
+            const zipUrl = currentDownloadUrl.replace('.mp3', '.zip');
+            
+            const link = document.createElement('a');
+            link.href = zipUrl;
+            link.download = document.getElementById('videoTitle').textContent + '.zip';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function downloadAll() {
+            if (!currentDownloadUrl) {
+                alert('Nenhum arquivo disponível para download');
+                return;
+            }
+            
+            // First download MP3
+            downloadAudio();
+            // Then download ZIP after short delay
+            setTimeout(downloadZip, 1000);
+        }
+
+        function copyLink() {
+            navigator.clipboard.writeText(currentDownloadUrl)
+                .then(() => alert('Link copiado para área de transferência!'))
+                .catch(err => alert('Falha ao copiar link: ' + err));
+        }
+    </script>
+</body>
+</html>
